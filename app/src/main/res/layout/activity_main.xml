@@ -12,12 +12,11 @@
         android:background="#00f">
 
         <com.jiakaiyang.eraseview.lib.EraseImageView
-            android:id="@+id/image"
+            android:id="@+id/eraseView"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:background="#0f0"
-            android:src="#f00" />
+            android:background="#0f0" />
     </FrameLayout>
 
 
