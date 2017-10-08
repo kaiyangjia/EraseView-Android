@@ -29,7 +29,7 @@ public class DrawUtils {
         Class clazz = canvas.getClass();
         try {
 //            Field bitmapField = clazz.getDeclaredField("mBitmap");
-            Field bitmapField = ObjectUtils.getDeclaredMethod(canvas, "mBitmap");
+            Field bitmapField = ObjectUtils.getDeclaredField(canvas, "mBitmap");
 
             boolean saveAccessible = bitmapField.isAccessible();
             if (!saveAccessible) {

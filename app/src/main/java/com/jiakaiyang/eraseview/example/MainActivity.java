@@ -1,5 +1,7 @@
 package com.jiakaiyang.eraseview.example;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -8,8 +10,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewTreeObserver;
 
+import com.jiakaiyang.eraseview.lib.EraseFrameLayout;
 import com.jiakaiyang.eraseview.lib.EraseImageView;
 import com.jiakaiyang.eraseview.lib.EraseView;
+import com.jiakaiyang.eraseview.lib.ObjectUtils;
+import com.jiakaiyang.eraseview.lib.OnDrawListener;
+import com.jiakaiyang.eraseview.lib.drawable.EraseColorDrawable;
+
+import java.lang.reflect.Field;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -24,35 +32,35 @@ public class MainActivity extends AppCompatActivity {
 
     private void initView() {
         final EraseImageView eraseView = (EraseImageView) findViewById(R.id.eraseView);
+        final EraseFrameLayout parentView = (EraseFrameLayout) eraseView.getParent();
 
-        ViewTreeObserver observer = eraseView.getViewTreeObserver();
-        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            private boolean hasCalled = false;
-
+        eraseView.addOnDrawListener(new OnDrawListener() {
             @Override
-            public void onGlobalLayout() {
-                if (hasCalled) {
-                    return;
-                }
-
+            public void onDraw(Canvas canvas) {
                 Rect rect = new Rect();
                 eraseView.getGlobalVisibleRect(rect);
 
-                rect.right = rect.right / 2;
-                rect.bottom = rect.bottom / 2;
+                rect.right = (rect.right + rect.left) / 2;
+                rect.bottom = (rect.bottom + rect.top) / 2;
 
-                int width = rect.width();
-                int height = rect.height();
+//                int[] pixels = parentView.getPixels(rect);
+//                eraseView.setPixels(rect, pixels);
 
-                int[] pixels = new int[width * height];
-                for (int i = 0; i < pixels.length; i++) {
-                    pixels[i] = 0;
+
+                EraseColorDrawable eraseColorDrawable = new EraseColorDrawable(Color.GRAY);
+                eraseColorDrawable.setEraseColor(Color.CYAN);
+                eraseColorDrawable.setEraseRect(rect);
+
+                Field field = ObjectUtils.getDeclaredField(eraseView, "mBackground");
+                try {
+                    field.setAccessible(true);
+                    field.set(eraseView, eraseColorDrawable);
+                } catch (IllegalAccessException e) {
+                    Log.e(TAG, "onDraw: IllegalAccessException: " + e.getMessage());
                 }
-
-                eraseView.setPixels(rect, pixels);
-
-                hasCalled = true;
             }
         });
+
+
     }
 }

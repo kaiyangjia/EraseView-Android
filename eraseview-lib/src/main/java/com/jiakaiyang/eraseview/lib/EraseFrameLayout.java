@@ -21,15 +21,20 @@ public class EraseFrameLayout extends FrameLayout implements EraseParent {
     private Bitmap canvasBitmap;
 
     public EraseFrameLayout(@NonNull Context context) {
-        super(context);
+        this(context, null, 0);
     }
 
     public EraseFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public EraseFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init() {
+        setDrawingCacheEnabled(true);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -40,7 +45,7 @@ public class EraseFrameLayout extends FrameLayout implements EraseParent {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvasBitmap = DrawUtils.getCanvasBitmap(canvas);
+        canvasBitmap = getDrawingCache();
     }
 
     @Override

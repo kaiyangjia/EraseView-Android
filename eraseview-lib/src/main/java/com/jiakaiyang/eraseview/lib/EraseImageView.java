@@ -31,15 +31,20 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
     protected Bitmap mCanvasBitmap;
 
     public EraseImageView(Context context) {
-        super(context);
+        this(context, null, 0);
     }
 
     public EraseImageView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public EraseImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init() {
+        setDrawingCacheEnabled(true);
     }
 
     public boolean addOnDrawListener(OnDrawListener listener) {
@@ -78,9 +83,10 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        mCanvasBitmap = getDrawingCache();
+
         if (mCanvas == null) {
             mCanvas = canvas;
-            mCanvasBitmap = DrawUtils.getCanvasBitmap(mCanvas);
         }
 
         if (erasePaint == null) {
@@ -104,41 +110,17 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
     public void setPixels(final Rect rect, final int[] pixels) {
         if (mCanvasBitmap == null) {
             Log.e(TAG, "setPixels: mCanvasBitmap is null, onDraw has not been called");
-/*            addOnDrawListener(new OnDrawListener() {
-                @Override
-                public void onDraw(Canvas canvas) {
-                    onSetPixels(rect, pixels);
-                }
-            });*/
-
-            startBitmapCheck(rect, pixels);
             return;
         }
 
         onSetPixels(rect, pixels);
     }
 
-    private void startBitmapCheck(final Rect rect, final int[] pixels) {
-        final CheckNullThread checkThread = new CheckNullThread(mCanvasBitmap, null);
-        checkThread.addOnChangeListener(new CheckNullThread.OnChangeListener<Bitmap>() {
-            @Override
-            public void onChange(Bitmap object, Bitmap target) {
-                checkThread.removeOnChangeListener(this);
-
-                if (object != null) {
-                    onSetPixels(rect, pixels);
-                }
-            }
-        });
-
-        checkThread.start();
-    }
-
-
     private void onSetPixels(Rect rect, int[] pixels) {
         int width = rect.width();
         int height = rect.height();
-        mCanvasBitmap.setPixels(pixels, 0, width, rect.left, rect.top, width, height);
+
+        mCanvasBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
     }
 
     private Paint createErasePaint() {
