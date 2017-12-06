@@ -5,20 +5,19 @@
     android:layout_height="match_parent">
 
 
-    <FrameLayout
+    <com.jiakaiyang.eraseview.lib.EraseFrameLayout
         android:layout_width="300dp"
         android:layout_height="300dp"
         android:layout_gravity="center"
         android:background="@mipmap/ic_launcher">
 
         <com.jiakaiyang.eraseview.lib.EraseImageView
-            android:id="@+id/image"
+            android:id="@+id/eraseView"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:background="#0f0"
-            android:src="#f00" />
-    </FrameLayout>
+            android:background="#0f0" />
+    </com.jiakaiyang.eraseview.lib.EraseFrameLayout>
 
 
 </FrameLayout>

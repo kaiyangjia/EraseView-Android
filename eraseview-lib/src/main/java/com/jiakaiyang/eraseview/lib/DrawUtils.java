@@ -28,7 +28,8 @@ public class DrawUtils {
 
         Class clazz = canvas.getClass();
         try {
-            Field bitmapField = clazz.getDeclaredField("mBitmap");
+//            Field bitmapField = clazz.getDeclaredField("mBitmap");
+            Field bitmapField = ObjectUtils.getDeclaredField(canvas, "mBitmap");
 
             boolean saveAccessible = bitmapField.isAccessible();
             if (!saveAccessible) {
@@ -38,8 +39,6 @@ public class DrawUtils {
             result = (Bitmap) bitmapField.get(canvas);
 
             bitmapField.setAccessible(saveAccessible);
-        } catch (NoSuchFieldException e) {
-            Log.e(TAG, "getCanvasBitmap: NoSuchFieldException: " + e.getMessage());
         } catch (IllegalAccessException e) {
             Log.e(TAG, "getCanvasBitmap: IllegalAccessException: " + e.getMessage());
         }
