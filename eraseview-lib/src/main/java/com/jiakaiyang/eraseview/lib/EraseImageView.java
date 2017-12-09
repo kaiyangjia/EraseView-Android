@@ -3,19 +3,27 @@ package com.jiakaiyang.eraseview.lib;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import com.jiakaiyang.eraseview.lib.drawable.EraseBitmapDrawable;
+import com.jiakaiyang.eraseview.lib.utils.ClassUtils;
+
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.jiakaiyang.eraseview.lib.utils.ClassUtils.getTargetField;
 
 /**
  * Created by jia on 2017/9/30.
@@ -33,10 +41,9 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
 
     // The layer eraseToLayer will not be erase
     // Between top and eraseToLayer will be erase
-    private int eraseToLayer = Layer.PARENT_BACKGROUND;
+    private int eraseToLayer = Layer.CURRENT_BACKGROUND;
 
     protected Canvas mCanvas;
-    protected Bitmap mCanvasBitmap;
 
     public EraseImageView(Context context) {
         this(context, null, 0);
@@ -52,7 +59,7 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
     }
 
     private void init() {
-        setDrawingCacheEnabled(true);
+//        setDrawingCacheEnabled(true);
     }
 
     public boolean addOnDrawListener(OnDrawListener listener) {
@@ -89,38 +96,32 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        mCanvasBitmap = getDrawingCache();
-
         if (mCanvas == null) {
             mCanvas = canvas;
         }
 
-        if (erasePaint == null) {
-            erasePaint = createErasePaint();
-        }
+        try {
+            Field field = ClassUtils.getDeclaredField(this, "mDrawable");
+            field.setAccessible(true);
 
-        int marginLeft = getLeft();
-        int marginTop = getTop();
-
-//        Rect rect = new Rect(0, 0, getWidth() / 2, getHeight() / 2);
-//        canvas.drawRect(rect, erasePaint);
-
-        if (mOnDrawListeners != null) {
-            for (OnDrawListener listener : mOnDrawListeners) {
-                listener.onDraw(canvas);
+            Drawable drawable = (Drawable) field.get(this);
+            if (drawable instanceof BitmapDrawable) {
+                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+                EraseBitmapDrawable proxyDrawable = new EraseBitmapDrawable(bitmapDrawable);
+                field.set(this, proxyDrawable);
+            } else {
+                // TODO: 2017/12/8 handle other type Drawable
             }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (ClassCastException e) {
+            e.printStackTrace();
         }
+        super.onDraw(canvas);
     }
 
     @Override
     public void setPixels(final Rect rect, final int[] pixels) {
-        if (mCanvasBitmap == null) {
-            Log.e(TAG, "setPixels: mCanvasBitmap is null, onDraw has not been called");
-            return;
-        }
-
         onSetPixels(rect, pixels);
     }
 
@@ -138,8 +139,6 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
 
         Drawable background = getTargetDrawable();
         background.setBounds(roundRect);
-
-        mCanvasBitmap.setPixels(pixels, 0, width, 0, 0, width, height);
     }
 
     private Paint createErasePaint() {
@@ -147,7 +146,7 @@ public class EraseImageView extends AppCompatImageView implements EraseChild {
         paint.setAntiAlias(true);
 //        paint.setColor(Color.TRANSPARENT);
         paint.setAlpha(0xFF);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
         return paint;
     }
