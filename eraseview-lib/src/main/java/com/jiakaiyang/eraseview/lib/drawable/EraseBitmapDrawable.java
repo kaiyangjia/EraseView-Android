@@ -21,6 +21,8 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.jiakaiyang.eraseview.lib.shape.EraseShape;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -33,7 +35,7 @@ import java.lang.reflect.Field;
  * The Bitmap with Hook
  */
 
-public class EraseBitmapDrawable extends BitmapDrawable {
+public class EraseBitmapDrawable extends BitmapDrawable implements EraseDrawable{
     private static final String TAG = "EraseBitmapDrawable";
 
     private BitmapDrawable mBase;
@@ -426,5 +428,10 @@ public class EraseBitmapDrawable extends BitmapDrawable {
     @Override
     public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser, @NonNull AttributeSet attrs) throws XmlPullParserException, IOException {
         mBase.inflate(r, parser, attrs);
+    }
+
+    @Override
+    public void erase(EraseShape shape, float locationX, float locationY) {
+
     }
 }
